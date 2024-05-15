@@ -18,6 +18,13 @@ This assumes the unit of wave[1] is V, can be substituted for any other unit.
 
 **In the future support for windowing functions should be added.**
 
+The function returns a tuple (xf,yf,fft_max_f,fft_f_res) in which:
+
+- xf is an array of frequency bins [0..max_f] is max_f is not None, else [0..fft_max_f]
+- yf is an equally sized array of magnitudes with th eunit determined by the argument 'output'
+- fft_max_f is the maximum frequency if the fft (equal to the Nyquist frequency)
+- fft_f_res is the frequency resolution in the resulting fft. This is the distance between frequency bins.
+
 
 ### thd(fft,f0,correct_peaks=False,min_level=None)
 
@@ -28,6 +35,11 @@ The argument 'f0' is the fundamental frequency for which the harmonics are searc
 The argument 'correct_peaks' will decide if frequency bin correction is applied. Frequency bin correction means that after finding the bin for a harmonic, the bin with highest value will take over. This is only for bins directly neighbouring with the original bin, and without any inbetween bins with lower values.
 
 The argument 'min_level' defines the lowest signal level for which harmonics will be included in the THD calculation. Any values lower than 'min_level' will be skipped.
+
+The function returns a tuple (thd,bins) where
+
+- thd is a float giving the total harmonic distortion (in %)
+- bins is an array of indices into the frequency bins for the harmonics (regardless if they have been taken into account for the thd calculation or not)
 
 
 ### frequency_window(fft,centre,span)
@@ -42,4 +54,10 @@ The returned slice will be in the same format as the input argument 'fft', namel
 ## installation
 
 ```python3 -m pip install fft_calculations```
+
+
+## requirements
+
+- numpy
+- scipy
 
