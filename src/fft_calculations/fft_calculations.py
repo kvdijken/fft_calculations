@@ -1,7 +1,9 @@
 import numpy as np
-from scipy.fft import rfft, rfftfreq
-from scipy.signal.windows import flattop
+from scipy.fft import rfft
+from scipy.fft import rfftfreq
+from scipy.signal.windows import flattop, blackman, hamming, hann
 
+#import scipy.fft
 
 # x in V
 sq2 = np.sqrt(2)
@@ -86,13 +88,13 @@ def fft(wave, max_f=None, output='dBVrms'):
     sara = N / Tmax
     fft_max_f = sara / 2
 
-    # samplerate (samples/second)
-    samplerate = N / Tmax
-    samplespacing = 1/samplerate
+    samplespacing = 1/sara
     xf = rfftfreq(N,samplespacing)
 
     # perform fft, returns yf in V
-    yf = 2*np.abs(rfft(y,norm='forward'))
+    w = blackman(N)
+    acf = N / np.sum(w) # amplitude correction factor for this window
+    yf = 2 * acf * np.abs(rfft(y*w,N,norm='forward'))
 
     if output == 'dBVrms':
         yf = Vrms_to_dBVrms(V_to_Vrms(yf))
@@ -143,7 +145,7 @@ def _bin(array,value):
 # note that the returned yf is not in dB
 # thd in %
 # bins: indices in xf for harmonics
-def thd(fft,f0,correct_peaks=False,min_level=None):
+def thd(fft,f0,correct_peaks=False,min_level=None,harmonics=None):
     '''
     Calculates THD (total harmonic distortion, in %) of a waveform
     obtained from the oscilloscope.
@@ -159,7 +161,8 @@ def thd(fft,f0,correct_peaks=False,min_level=None):
     min_level : minimum signal level (in dBV) for harmonics to be included in the
                 THD calculation (default=None). If min_level == None all harmonics bins
                 will be included, also if the signal appears to be below the noise level.
-
+    harmonics : (n) int | None. Will only use the first n harmonics (including, n>1) of
+                all if None.
     Returns:
 
     thd : total harmonic distortion (in %)
@@ -173,6 +176,9 @@ def thd(fft,f0,correct_peaks=False,min_level=None):
 
     # Get the bins for all harmonics
     bins = [_bin(xf,f) for f in freqs]
+    
+    if harmonics is not None:
+        bins = bins[0:harmonics]
 
     if correct_peaks:
         # correct bins for the exact location of the nearby peak
