@@ -4,11 +4,14 @@ build-backend = "hatchling.build"
 
 [project]
 name = "fft_calculations"
-version = "0.1.0"
+version = "0.2.2"
 authors = [
   { name="kvdijken", email="sla_nippers_0x@icloud.com" },
 ]
-dependencies = ["numpy","scipy"]
+dependencies = [
+"numpy",
+"scipy"
+]
 
 description = "A package with some fft utility functions"
 readme = "README.md"
